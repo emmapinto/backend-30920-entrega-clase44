@@ -1,0 +1,15 @@
+
+
+  test api rest
+    GET
+      ✔ debería retornar status 200 y un array vacio o de productos (234ms)
+    POST
+      ✔ debería crear un nuevo producto y devolver un objeto con las propiedades created y products (199ms)
+    PUT
+      ✔ debería editar el elemento previamente creado y devolver un objeto con las propiedades edited y products (183ms)
+    DELETE
+      ✔ debería eliminar el producto previamente creado y devolver un objeto con la propiedad mensajeque contenga el siguiente string: "Deleted product with id: id" (183ms)
+
+
+  4 passing (811ms)
+

@@ -1,0 +1,127 @@
+<section>
+    <h2>Bienvenido, {{username}}</h2>
+    <a href="/logout">
+        <button>Desloguear</button>
+    </a>
+</section>
+<section>
+    <h1>Productos</h1>
+    <div id="product-list">
+        <table class="table table-dark table-striped mt-4">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <script>
+            function populate() {
+                fetch('/products_api/productos-test')
+                    .then(res => res.json())
+                    .then(data => {
+                        let productList = ''
+                        data.forEach(product => {
+                             productList += `
+                                <tr>
+                                    <th scope="row">${product.id}</th>
+                                    <td>${product.nombre}</td>
+                                    <td>$${product.precio}</td>
+                                    <td>
+                                        <img src="${product.foto}" alt="thumbnail" class="img-thumbnail mx-auto d-block" width="100px">
+                                    </td>
+                                </tr>
+                            `
+                        })
+                        document.querySelector('tbody').innerHTML = productList
+                    })
+                    .catch(err => console.log(err))
+            }
+            populate()
+        </script>
+    </div>
+</section>
+<section id="message-section">
+    <h1>Centro de mensajes</h1>
+    <h2></h2>
+    <label for="email" id="email-lbl"></label>
+    <input type="email" name="email" id="email" placeholder="Email" />
+    <label for="nombre" id="nombre-lbl"></label>
+    <input type="text" name="nombre" id="nombre" placeholder="Nombre" />
+    <label for="apellido" id="apellido-lbl"></label>
+    <input type="text" name="apellido" id="apellido" placeholder="Apellido" />
+    <label for="edad" id="edad-lbl"></label>
+    <input type="number" name="edad" id="edad" placeholder="Edad" min="0" step="1" />
+    <label for="alias" id="alias-lbl"></label>
+    <input type="text" name="alias" id="alias" placeholder="Alias" />
+    <label for="avatar" id="avatar-lbl"></label>
+    <input type="text" name="avatar" id="avatar" placeholder="Avatar" />
+    <div id="message-board">
+    </div>
+    <div>
+        <label for="message" id="message-lbl"></label>
+        <input type="text" name="message" id="message" placeholder="Escribe tu mensaje" >
+        <button onclick="sendMessage()" class="btn btn-secondary">Enviar</button>
+    </div>
+    <script>
+        const authorSchema = new normalizr.schema.Entity('authors')
+        const postSchema = new normalizr.schema.Entity('post', {
+            author: authorSchema
+        })
+        const postsSchema = new normalizr.schema.Entity('posts', { mensajes: [postSchema], authors: [authorSchema] })
+
+        function sendMessage(){
+            const msj = {
+                email: document.querySelector('#email').value,
+                nombre: document.querySelector('#nombre').value,
+                apellido: document.querySelector('#apellido').value,
+                edad: document.querySelector('#edad').value,
+                alias: document.querySelector('#alias').value,
+                avatar: document.querySelector('#avatar').value,
+                message: document.querySelector('#message').value
+            }
+            for(const [key, val] of Object.entries(msj)){
+                if(val == '' || !val) {
+                    return document.querySelector(`#${key}-lbl`).innerHTML = '* campo requerido'
+                } else {
+                    document.querySelector(`#${key}-lbl`).innerHTML = ''
+                }
+            }
+            socket.emit('userMessage', {
+                author: {
+                    id: msj.email,
+                    nombre: msj.nombre,
+                    apellido: msj.apellido,
+                    edad: msj.edad,
+                    alias: msj.alias,
+                    avatar: msj.avatar
+                },
+                text: msj.message
+            })
+        }
+
+        socket.on('messageBoard', mensajes => {
+            const mensajesNormalizados = normalizr.denormalize(mensajes.result, postsSchema, mensajes.entities)
+            if(mensajesNormalizados.mensajes.length < 1) return
+            let board = ''
+            mensajesNormalizados.mensajes.sort((a, b) => a.id > b.id ? -1 : 1)
+            mensajesNormalizados.mensajes.forEach(msg => {
+                board += `
+                    <p class="msg">
+                        <span class="from">${msg.author.id}</span>
+                        <span class="name">${msg.author.nombre} ${msg.author.apellido}: </span>
+                        <span class="content">${msg.text}</span>
+                        <img class="thumbnail" src="${msg.author.avatar}" alt="Avatar de ${msg.author.nombre}" />
+                    </p>
+                `
+            })
+            document.querySelector('#message-board').innerHTML = board
+            const compresion = Math.floor(100 - ((JSON.stringify(mensajes).length / JSON.stringify(mensajesNormalizados).length) *100))
+            document.querySelector('#message-section h2').innerHTML = `Compresión: ${compresion}%`
+        })
+    </script>
+</section>

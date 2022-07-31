@@ -1,0 +1,25 @@
+
+
+  test api rest
+    GET
+      ✔ debería retornar status 200 y un array vacio o de productos (215ms)
+    POST
+      ✔ debería crear un nuevo producto y devolver un objeto con las propiedades del producto (284ms)
+    PUT
+      ✔ debería editar el elemento previamente creado y devolver un objeto con las propiedades del producto (183ms)
+    DELETE
+      ✔ debería eliminar el producto previamente creado y devolver una lista de todos los productos" (185ms)
+
+  test api with GraphQL
+    Query
+      ✔ debería retornar status 200 y un array vacio o de productos (195ms)
+    Mutation (crear)
+      ✔ debería crear un nuevo producto y devolver un objeto con las propiedades del producto (187ms)
+    Mutation (editar)
+      ✔ debería editar el elemento previamente creado y devolver un objeto con las propiedades del producto (185ms)
+    Mutation (eliminar)
+      ✔ debería eliminar el producto previamente creado y devolver una lista de todos los productos" (185ms)
+
+
+  8 passing (2s)
+
